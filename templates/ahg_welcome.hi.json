@@ -1,0 +1,42 @@
+{
+  "name": "ahg_welcome",
+  "language": "hi",
+  "category": "MARKETING",
+  "parameter_format": "NAMED",
+  "components": [
+    {
+      "type": "HEADER",
+      "format": "TEXT",
+      "text": "AHG53 Agency mein swagat hai"
+    },
+    {
+      "type": "BODY",
+      "text": "Hi {{customer_name}}, AHG53 Agency se judne ke liye shukriya — Ideas to Digital Reality.\n\nHum businesses ke liye websites, mobile apps, custom software, e-commerce stores aur AI & WhatsApp automation banate hain — best price, best work.\n\nNeeche button dabakar hamari services dekhein ya free quote lijiye.",
+      "example": {
+        "body_text_named_params": [
+          {
+            "param_name": "customer_name",
+            "example": "Aisha"
+          }
+        ]
+      }
+    },
+    {
+      "type": "FOOTER",
+      "text": "Band karne ke liye STOP likhein"
+    },
+    {
+      "type": "BUTTONS",
+      "buttons": [
+        {
+          "type": "QUICK_REPLY",
+          "text": "Free Quote Lijiye"
+        },
+        {
+          "type": "QUICK_REPLY",
+          "text": "Hamari Services"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "name": "ahg_quote_followup_2",
+  "language": "en",
+  "category": "MARKETING",
+  "parameter_format": "NAMED",
+  "components": [
+    {
+      "type": "BODY",
+      "text": "Hi {{customer_name}}, just checking in on your {{service}} project.\n\nIf timing or budget has changed, we can suggest a smaller first phase so you can start sooner. Reply here anytime.",
+      "example": {
+        "body_text_named_params": [
+          {
+            "param_name": "customer_name",
+            "example": "Aisha"
+          },
+          {
+            "param_name": "service",
+            "example": "Mobile Apps"
+          }
+        ]
+      }
+    },
+    {
+      "type": "FOOTER",
+      "text": "Reply STOP to unsubscribe"
+    },
+    {
+      "type": "BUTTONS",
+      "buttons": [
+        {
+          "type": "QUICK_REPLY",
+          "text": "Suggest a plan"
+        },
+        {
+          "type": "QUICK_REPLY",
+          "text": "Not right now"
+        }
+      ]
+    }
+  ]
+}

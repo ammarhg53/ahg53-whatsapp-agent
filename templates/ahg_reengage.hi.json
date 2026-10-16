@@ -1,0 +1,37 @@
+{
+  "name": "ahg_reengage",
+  "language": "hi",
+  "category": "MARKETING",
+  "parameter_format": "NAMED",
+  "components": [
+    {
+      "type": "BODY",
+      "text": "Hi {{customer_name}}, kaafi time ho gaya! 👋\n\nAgar aap apne business ke liye nayi website, app ya automation plan kar rahe hain, to AHG53 Agency madad ke liye ready hai — best price, best work, aur free quote.\n\nShuru karne ke liye QUOTE likhein, ya neeche hamara kaam dekhein.",
+      "example": {
+        "body_text_named_params": [
+          {
+            "param_name": "customer_name",
+            "example": "Aisha"
+          }
+        ]
+      }
+    },
+    {
+      "type": "FOOTER",
+      "text": "Band karne ke liye STOP likhein"
+    },
+    {
+      "type": "BUTTONS",
+      "buttons": [
+        {
+          "type": "URL",
+          "text": "Hamara kaam dekhein",
+          "url": "{{APP_URL}}/r/{{1}}",
+          "example": [
+            "{{APP_URL}}/r/a1b2c3d4e5f6"
+          ]
+        }
+      ]
+    }
+  ]
+}

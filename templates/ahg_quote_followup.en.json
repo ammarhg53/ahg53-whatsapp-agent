@@ -1,0 +1,41 @@
+{
+  "name": "ahg_quote_followup",
+  "language": "en",
+  "category": "MARKETING",
+  "parameter_format": "NAMED",
+  "components": [
+    {
+      "type": "BODY",
+      "text": "Hi {{customer_name}}, thanks again for your quote request for {{service}} with AHG53 Agency.\n\nDo you have any questions, or would you like to adjust the scope or budget? Just reply here and Ammar will help you personally.",
+      "example": {
+        "body_text_named_params": [
+          {
+            "param_name": "customer_name",
+            "example": "Aisha"
+          },
+          {
+            "param_name": "service",
+            "example": "Mobile Apps"
+          }
+        ]
+      }
+    },
+    {
+      "type": "FOOTER",
+      "text": "Reply STOP to unsubscribe"
+    },
+    {
+      "type": "BUTTONS",
+      "buttons": [
+        {
+          "type": "QUICK_REPLY",
+          "text": "I have a question"
+        },
+        {
+          "type": "QUICK_REPLY",
+          "text": "Let's get started"
+        }
+      ]
+    }
+  ]
+}

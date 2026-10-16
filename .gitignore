@@ -1,0 +1,15 @@
+node_modules
+.next
+.env
+.env.local
+.env*.local
+.vercel
+*.tsbuildinfo
+next-env.d.ts
+# generated from assets/logo.png by scripts/copy-logo.mjs
+public/logo.png
+src/app/icon.png
+# contact lists contain personal data — keep them out of git
+*.csv
+*.xlsx
+*.xls

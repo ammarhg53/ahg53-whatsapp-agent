@@ -1,0 +1,39 @@
+{
+  "name": "ahg53-whatsapp-agent",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "brand": "node scripts/copy-logo.mjs",
+    "predev": "node scripts/copy-logo.mjs",
+    "dev": "next dev",
+    "prebuild": "node scripts/copy-logo.mjs",
+    "build": "next build",
+    "start": "next start",
+    "pretypecheck": "node scripts/copy-logo.mjs",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test --experimental-strip-types tests/*.test.ts",
+    "test:e2e": "node tests/e2e.mjs",
+    "hash-password": "node scripts/hash-password.mjs",
+    "templates:submit": "node scripts/submit-templates.mjs",
+    "webhook:register": "node scripts/register-webhook.mjs",
+    "import:contacts": "node scripts/import-contacts.mjs"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.135.0",
+    "bcryptjs": "^3.0.3",
+    "jose": "^6.2.12",
+    "next": "^15.5.28",
+    "pdf-lib": "^1.17.1",
+    "react": "^19.3.1",
+    "react-dom": "^19.3.1",
+    "server-only": "^0.0.1",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "@types/react": "^19.3.0",
+    "@types/react-dom": "^19.3.0",
+    "typescript": "^5.9.3"
+  }
+}

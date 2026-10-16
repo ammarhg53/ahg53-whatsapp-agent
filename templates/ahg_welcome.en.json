@@ -1,0 +1,42 @@
+{
+  "name": "ahg_welcome",
+  "language": "en",
+  "category": "MARKETING",
+  "parameter_format": "NAMED",
+  "components": [
+    {
+      "type": "HEADER",
+      "format": "TEXT",
+      "text": "Welcome to AHG53 Agency"
+    },
+    {
+      "type": "BODY",
+      "text": "Hi {{customer_name}}, thanks for connecting with AHG53 Agency — Ideas to Digital Reality.\n\nWe build websites, mobile apps, custom software, e-commerce stores and AI & WhatsApp automation for businesses, with the best price and the best work.\n\nTap a button below to see our services or get a free quote.",
+      "example": {
+        "body_text_named_params": [
+          {
+            "param_name": "customer_name",
+            "example": "Aisha"
+          }
+        ]
+      }
+    },
+    {
+      "type": "FOOTER",
+      "text": "Reply STOP to unsubscribe"
+    },
+    {
+      "type": "BUTTONS",
+      "buttons": [
+        {
+          "type": "QUICK_REPLY",
+          "text": "Get a Free Quote"
+        },
+        {
+          "type": "QUICK_REPLY",
+          "text": "Our Services"
+        }
+      ]
+    }
+  ]
+}

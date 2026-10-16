@@ -1,0 +1,28 @@
+{
+  "name": "ahg_admin_alert",
+  "language": "en",
+  "category": "UTILITY",
+  "parameter_format": "NAMED",
+  "components": [
+    {
+      "type": "BODY",
+      "text": "New alert from your WhatsApp assistant: {{alert_type}}.\n\nCustomer: {{customer}}\nDetails: {{details}}\n\nOpen your dashboard to reply or resume the bot.",
+      "example": {
+        "body_text_named_params": [
+          {
+            "param_name": "alert_type",
+            "example": "Customer wants to talk to you"
+          },
+          {
+            "param_name": "customer",
+            "example": "Aisha (+971501234567)"
+          },
+          {
+            "param_name": "details",
+            "example": "Service: Websites, Budget: $500 - $2,000"
+          }
+        ]
+      }
+    }
+  ]
+}

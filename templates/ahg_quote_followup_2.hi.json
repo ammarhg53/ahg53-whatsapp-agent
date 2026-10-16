@@ -1,0 +1,41 @@
+{
+  "name": "ahg_quote_followup_2",
+  "language": "hi",
+  "category": "MARKETING",
+  "parameter_format": "NAMED",
+  "components": [
+    {
+      "type": "BODY",
+      "text": "Hi {{customer_name}}, aapke {{service}} project ke baare mein follow-up kar rahe hain.\n\nAgar timing ya budget badal gaya hai, to hum ek chhota pehla phase suggest kar sakte hain taaki aap jaldi shuru kar sakein. Kabhi bhi reply karein.",
+      "example": {
+        "body_text_named_params": [
+          {
+            "param_name": "customer_name",
+            "example": "Aisha"
+          },
+          {
+            "param_name": "service",
+            "example": "Mobile Apps"
+          }
+        ]
+      }
+    },
+    {
+      "type": "FOOTER",
+      "text": "Band karne ke liye STOP likhein"
+    },
+    {
+      "type": "BUTTONS",
+      "buttons": [
+        {
+          "type": "QUICK_REPLY",
+          "text": "Plan suggest karein"
+        },
+        {
+          "type": "QUICK_REPLY",
+          "text": "Abhi nahi"
+        }
+      ]
+    }
+  ]
+}

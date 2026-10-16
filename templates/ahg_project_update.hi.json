@@ -1,0 +1,33 @@
+{
+  "name": "ahg_project_update",
+  "language": "hi",
+  "category": "UTILITY",
+  "parameter_format": "NAMED",
+  "components": [
+    {
+      "type": "HEADER",
+      "format": "TEXT",
+      "text": "Project update"
+    },
+    {
+      "type": "BODY",
+      "text": "Hi {{customer_name}}, aapke project {{project_name}} ka update:\n\n{{update_text}}\n\nKoi sawaal ho to yahin reply karein. — AHG53 Agency",
+      "example": {
+        "body_text_named_params": [
+          {
+            "param_name": "customer_name",
+            "example": "Aisha"
+          },
+          {
+            "param_name": "project_name",
+            "example": "Company Website"
+          },
+          {
+            "param_name": "update_text",
+            "example": "The homepage design is ready for your review."
+          }
+        ]
+      }
+    }
+  ]
+}
