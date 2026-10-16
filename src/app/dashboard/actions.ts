@@ -7,10 +7,10 @@ import { requireAdmin } from '@/lib/auth';
 import { sheet } from '@/lib/sheets';
 import { build } from '@/lib/kapso';
 import { send } from '@/lib/outbound';
-import { optIn, optOut, deleteContactData, eraseFromKapso } from '@/lib/consent';
+import { optIn, optOut, deleteContactData, eraseFromKapso, isSuppressed } from '@/lib/consent';
 import { importOptedIn } from '@/lib/import';
 import { resumeBot, pauseBot } from '@/lib/contacts';
-import { sendTemplate, syncTemplates } from '@/lib/templates';
+import { pickTemplate, sendTemplate, syncTemplates } from '@/lib/templates';
 import { audienceSchema, confirmCampaign, countAudience } from '@/lib/campaigns';
 import { quotaStatus } from '@/lib/quota';
 import { saveSetting } from '@/lib/settings';
@@ -116,6 +116,42 @@ export async function importContactsAction(form: FormData) {
   }
   const r = await importOptedIn(rows, `import:${source}`);
   back('/dashboard/conversations', `Added ${r.added}, opted in ${r.optedIn} existing, skipped ${r.skippedOptedOut} who sent STOP, ${invalid} invalid`);
+}
+
+/** Start a conversation with any number using an approved template. */
+export async function sendToNumberAction(form: FormData) {
+  await requireAdmin();
+  const template = z.string().regex(/^[a-z0-9_]{1,512}$/).safeParse(form.get('template'));
+  const path = `/dashboard/send${template.success ? `?template=${template.data}` : ''}`;
+  const fail = (msg: string) => redirect(`${path}${path.includes('?') ? '&' : '?'}msg=${encodeURIComponent(msg)}`);
+  if (!template.success) fail('Choose a template');
+  const waId = normalizeWaId(String(form.get('phone') ?? '').replace(/^00/, ''));
+  if (!waId || waId.length < 10) fail('Enter the full number with country code, e.g. +971 50 123 4567');
+
+  const tpl = await pickTemplate(template.data!, form.get('lang') === 'hinglish' ? 'hinglish' : 'en');
+  if (!tpl) fail('That template is not approved yet');
+  const isMarketing = tpl!.category === 'MARKETING';
+  const source = cleanField(form.get('source'), 40);
+  if (isMarketing && (form.get('consent') !== 'on' || !source)) fail('Marketing templates need the person\'s consent and where it came from');
+
+  if (await isSuppressed(waId!)) fail('This number opted out (STOP) or asked for deletion — not sent');
+  const { row: contact } = await sheet.insert<Contact>('contacts', {
+    wa_id: waId,
+    name: cleanField(form.get('name'), 60) || null,
+    country: cleanField(form.get('country'), 60) || null,
+    lang: form.get('lang') === 'hinglish' ? 'hinglish' : 'en'
+  }, { ignoreConflict: true });
+  if (contact.opted_out) fail('This number opted out (STOP) — not sent');
+  if (isMarketing && !contact.marketing_opt_in) await optIn(contact, `manual:${source}`);
+
+  const fixed: Record<string, string> = {};
+  for (const [k, v] of form.entries()) {
+    if (k.startsWith('param_') && typeof v === 'string' && v.trim()) fixed[k.slice(6)] = cleanField(v, 600);
+  }
+  const res = await sendTemplate(contact, template.data!, isMarketing ? 'marketing' : 'utility', { fixed });
+  await sheet.drain();
+  if (!res.ok) fail(`Not sent: ${res.reason === 'quota' ? 'monthly message limit reached' : res.reason === 'no_template' ? 'template not approved' : (res as { error?: string }).error ?? 'error'}`);
+  back(`/dashboard/conversations/${contact.id}`, 'Template sent. When they reply you can type freely here for 24 hours.');
 }
 
 // ---------------------------------------------------------------- leads
