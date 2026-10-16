@@ -34,6 +34,17 @@ let scheduled = false;
 let chain: Promise<void> = Promise.resolve();
 
 async function post(ops: Op[]): Promise<{ ok: boolean; data?: unknown; error?: string; code?: string }[]> {
+  try {
+    return await postOnce(ops);
+  } catch (err) {
+    // The script answers "busy" when another write holds its lock; nothing was applied, so retry once.
+    if ((err as SheetError).code !== 'busy') throw err;
+    await new Promise((r) => setTimeout(r, 1500));
+    return postOnce(ops);
+  }
+}
+
+async function postOnce(ops: Op[]): Promise<{ ok: boolean; data?: unknown; error?: string; code?: string }[]> {
   const e = env();
   const res = await fetch(e.APPS_SCRIPT_URL, {
     method: 'POST',

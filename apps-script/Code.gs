@@ -154,8 +154,10 @@ function doPost(e) {
   if (!secret || secret.length < 24 || body.secret !== secret) return json({ error: 'unauthorized' });
   if (!Array.isArray(body.ops) || body.ops.length > 200) return json({ error: 'bad ops' });
 
-  var lock = LockService.getScriptLock();
-  if (!lock.tryLock(25000)) return json({ error: 'busy' });
+  // Only writes take the script lock; reads and cache ops (login limiter, dedupe) never wait behind it.
+  var writes = body.ops.some(function (op) { return WRITE_OPS.indexOf(op.op) > -1; });
+  var lock = writes ? LockService.getScriptLock() : null;
+  if (lock && !lock.tryLock(15000)) return json({ error: 'busy' });
   try {
     var ctx = newCtx();
     var results = body.ops.map(function (op) {
@@ -165,12 +167,14 @@ function doPost(e) {
         return { ok: false, error: String(err && err.message || err), code: err && err.code };
       }
     });
-    SpreadsheetApp.flush();
+    if (writes) SpreadsheetApp.flush();
     return json({ results: results });
   } finally {
-    lock.releaseLock();
+    if (lock) lock.releaseLock();
   }
 }
+
+var WRITE_OPS = ['insert', 'update', 'upsert', 'remove', 'consume_quota', 'release_quota', 'inbound', 'cleanup'];
 
 function json(obj) {
   return ContentService.createTextOutput(JSON.stringify(obj)).setMimeType(ContentService.MimeType.JSON);

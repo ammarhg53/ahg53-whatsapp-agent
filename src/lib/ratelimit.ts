@@ -19,12 +19,13 @@ export function rateLimitLocal(key: string, windowSeconds: number, max: number):
 }
 
 /** Shared limiter (Apps Script cache) for low-volume, security-sensitive endpoints such as login. */
-export async function rateLimitShared(key: string, windowSeconds: number, max: number, failOpen = false): Promise<boolean> {
+/** Returns `onError` when the limiter can't be reached, so callers can tell "blocked" from "unavailable". */
+export async function rateLimitShared<T extends boolean | null = boolean>(key: string, windowSeconds: number, max: number, onError: T): Promise<boolean | T> {
   try {
     return await sheet.call<boolean>('rate_limit', { key, window: windowSeconds, max });
   } catch (err) {
     log.warn('shared rate limit unavailable', { bucket: key.split(':')[0], error: (err as Error).message });
-    return failOpen;
+    return onError;
   }
 }
 
