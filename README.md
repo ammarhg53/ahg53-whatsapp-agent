@@ -77,12 +77,12 @@ git push -u origin main
 1. vercel.com → **Add New → Project** → import the GitHub repo (framework: Next.js).
 2. **Settings → Environment Variables**: add every variable from `.env.local`. Set `APP_URL` to your Vercel URL.
 3. Deploy. Every `git push` deploys again.
-4. **Cron** (campaigns, follow-ups, reminders) must run every 5 minutes. Vercel's free Hobby plan only allows a
-   daily cron, so on Hobby use the included Apps Script trigger instead:
+4. **Cron** (campaigns, follow-ups, reminders) should run every 5 minutes. `vercel.json` only schedules a daily backup
+   run (10:00 IST), because Vercel's free Hobby plan allows nothing more frequent. The 5-minute run comes from Apps Script:
    - In the Apps Script editor, add script properties `CRON_URL` = `https://YOUR-APP.vercel.app/api/cron/tick`
      and `CRON_SECRET` = the same value as on Vercel.
    - Run the `installCron` function once. It calls the endpoint every 5 minutes.
-   On Vercel Pro, `vercel.json` already schedules it, and you can skip `installCron`.
+   On Vercel Pro you can set `vercel.json` to `*/5 * * * *` and skip `installCron`.
 
 ### 5. Connect the Kapso webhook
 ```bash
