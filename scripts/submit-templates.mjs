@@ -41,7 +41,8 @@ for (const file of files) {
   let raw = readFileSync(path.join(dir, file), 'utf8').replaceAll('{{APP_URL}}', appUrl);
   if (raw.includes('{{EXAMPLE_IMAGE_HANDLE}}') && !dry && (!only || raw.includes(`"name": "${only}"`))) {
     try {
-      raw = raw.replaceAll('{{EXAMPLE_IMAGE_HANDLE}}', await getExampleHandle());
+      // The handle can contain line breaks, so insert it as an escaped JSON string.
+      raw = raw.replaceAll('"{{EXAMPLE_IMAGE_HANDLE}}"', JSON.stringify(await getExampleHandle()));
     } catch (err) {
       failures++;
       console.log(`✗ ${file} → ${err.message}`);
@@ -65,4 +66,4 @@ for (const file of files) {
   }
 }
 if (!dry) console.log('\nApproval usually takes minutes to a day. Then open Dashboard → Templates → Sync.');
-process.exit(failures ? 1 : 0);
+process.exitCode = failures ? 1 : 0;
