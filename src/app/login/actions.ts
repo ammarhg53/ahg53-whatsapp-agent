@@ -3,12 +3,16 @@
 import bcrypt from 'bcryptjs';
 import { cookies, headers } from 'next/headers';
 import { redirect } from 'next/navigation';
-import { env } from '@/lib/env';
+import { env, envProblems } from '@/lib/env';
 import { rateLimitShared, clientIp } from '@/lib/ratelimit';
 import { SESSION_COOKIE, SESSION_HOURS, signSession } from '@/lib/session';
 import { log } from '@/lib/log';
 
 export async function login(_prev: string | null, form: FormData): Promise<string | null> {
+  // A missing setting would otherwise surface as "too many attempts" (the limiter can't reach the Sheet).
+  const problems = envProblems();
+  if (problems.length) return `Server setup incomplete — check these Vercel environment variables, then redeploy: ${problems.join(', ')}`;
+
   const ip = clientIp(await headers());
   // 5 attempts per 15 minutes per IP; fail closed if the limiter is unavailable.
   if (!(await rateLimitShared(`login:${ip}`, 900, 5, false))) return 'Too many attempts. Try again in 15 minutes.';

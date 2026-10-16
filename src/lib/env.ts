@@ -31,16 +31,25 @@ export type Env = z.infer<typeof schema>;
 
 let cached: Env | null = null;
 
+function parse() {
+  const blankToUndefined = Object.fromEntries(
+    Object.entries(process.env).map(([k, v]) => [k, v === '' ? undefined : v?.trim()])
+  );
+  return schema.safeParse(blankToUndefined);
+}
+
+/** Names (never values) of environment variables that are missing or invalid. */
+export function envProblems(): string[] {
+  const parsed = parse();
+  return parsed.success ? [] : [...new Set(parsed.error.issues.map((i) => i.path.join('.')))];
+}
+
 /** Validated server environment. Throws with the names (never values) of bad vars. */
 export function env(): Env {
   if (cached) return cached;
-  const blankToUndefined = Object.fromEntries(
-    Object.entries(process.env).map(([k, v]) => [k, v === '' ? undefined : v])
-  );
-  const parsed = schema.safeParse(blankToUndefined);
+  const parsed = parse();
   if (!parsed.success) {
-    const names = parsed.error.issues.map((i) => i.path.join('.')).join(', ');
-    throw new Error(`Invalid or missing environment variables: ${names}`);
+    throw new Error(`Invalid or missing environment variables: ${envProblems().join(', ')}`);
   }
   cached = parsed.data;
   return cached;
