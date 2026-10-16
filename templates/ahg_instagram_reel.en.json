@@ -1,0 +1,50 @@
+{
+  "name": "ahg_instagram_reel",
+  "language": "en",
+  "category": "MARKETING",
+  "parameter_format": "NAMED",
+  "components": [
+    {
+      "type": "HEADER",
+      "format": "IMAGE",
+      "example": {
+        "header_handle": [
+          "{{EXAMPLE_IMAGE_HANDLE}}"
+        ]
+      }
+    },
+    {
+      "type": "BODY",
+      "text": "Hi {{customer_name}}! 🎬\n\nWe just posted a new reel on Instagram: {{reel_topic}}.\n\nTap below to watch it, and follow AHG53 Agency for tips on websites, apps and automation.",
+      "example": {
+        "body_text_named_params": [
+          {
+            "param_name": "customer_name",
+            "example": "Aisha"
+          },
+          {
+            "param_name": "reel_topic",
+            "example": "5 signs your business needs a new website"
+          }
+        ]
+      }
+    },
+    {
+      "type": "FOOTER",
+      "text": "Reply STOP to unsubscribe"
+    },
+    {
+      "type": "BUTTONS",
+      "buttons": [
+        {
+          "type": "URL",
+          "text": "Watch the reel",
+          "url": "{{APP_URL}}/r/{{1}}",
+          "example": [
+            "{{APP_URL}}/r/a1b2c3d4e5f6"
+          ]
+        }
+      ]
+    }
+  ]
+}

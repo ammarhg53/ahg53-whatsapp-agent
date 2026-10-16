@@ -1,0 +1,50 @@
+{
+  "name": "ahg_promo_image",
+  "language": "hi",
+  "category": "MARKETING",
+  "parameter_format": "NAMED",
+  "components": [
+    {
+      "type": "HEADER",
+      "format": "IMAGE",
+      "example": {
+        "header_handle": [
+          "{{EXAMPLE_IMAGE_HANDLE}}"
+        ]
+      }
+    },
+    {
+      "type": "BODY",
+      "text": "Hi {{customer_name}}! ✨\n\n{{promo_text}}\n\nAHG53 Agency — Ideas to Digital Reality. Best price, best work. Zyada jaankari ya free quote ke liye is message ka reply karein.",
+      "example": {
+        "body_text_named_params": [
+          {
+            "param_name": "customer_name",
+            "example": "Aisha"
+          },
+          {
+            "param_name": "promo_text",
+            "example": "Special prices on business websites and mobile apps this month."
+          }
+        ]
+      }
+    },
+    {
+      "type": "FOOTER",
+      "text": "Band karne ke liye STOP likhein"
+    },
+    {
+      "type": "BUTTONS",
+      "buttons": [
+        {
+          "type": "URL",
+          "text": "Details dekhein",
+          "url": "{{APP_URL}}/r/{{1}}",
+          "example": [
+            "{{APP_URL}}/r/a1b2c3d4e5f6"
+          ]
+        }
+      ]
+    }
+  ]
+}

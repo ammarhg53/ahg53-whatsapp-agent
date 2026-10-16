@@ -2,7 +2,8 @@ import Link from 'next/link';
 import { sheet } from '@/lib/sheets';
 import { sendToNumberAction } from '../actions';
 import { Flash, type SearchParams } from '../ui';
-import type { TemplateRow } from '@/lib/templates';
+import { needsImage, type TemplateRow } from '@/lib/templates';
+import { ImageFields } from '../image-fields';
 
 // Filled from the form below or the contact; anything else needs its own field.
 const AUTO_PARAMS = new Set(['customer_name', 'country', 'business_name', 'service']);
@@ -54,6 +55,7 @@ export default async function SendToNumber({ searchParams }: { searchParams: Sea
             </label>
           </div>
           {extraParams.map((p) => <label key={p}>{p}<input name={`param_${p}`} required maxLength={600} /></label>)}
+          {variants.some((t) => needsImage(t)) && <ImageFields />}
           {marketing && (
             <fieldset className="card stack">
               <legend><b>Consent</b> (required for marketing templates)</legend>

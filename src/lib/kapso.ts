@@ -59,6 +59,26 @@ export async function eraseKapsoContact(waId: string): Promise<boolean> {
   return res.status === 204 || res.status === 404;
 }
 
+/** Upload an image to WhatsApp (via Kapso) for use in a template header. Returns the media id (valid ~30 days). */
+export async function uploadMedia(file: Blob, mimeType: string): Promise<string> {
+  const e = env();
+  const form = new FormData();
+  form.append('messaging_product', 'whatsapp');
+  form.append('type', mimeType);
+  form.append('file', file, mimeType === 'image/png' ? 'image.png' : 'image.jpg');
+  const res = await fetch(proxyUrl(`${e.KAPSO_PHONE_NUMBER_ID}/media`), {
+    method: 'POST',
+    headers: { 'X-API-Key': e.KAPSO_API_KEY },
+    body: form,
+    redirect: 'error',
+    signal: AbortSignal.timeout(30_000),
+    cache: 'no-store'
+  });
+  const data = await res.json().catch(() => null);
+  if (!res.ok || !data?.id) throw new KapsoError(String(data?.error?.message ?? `Upload failed (HTTP ${res.status})`).slice(0, 200), res.status);
+  return String(data.id);
+}
+
 export type OutboundPayload =
   | { type: 'text'; text: { body: string; preview_url?: boolean } }
   | { type: 'image'; image: { link: string; caption?: string } }

@@ -1,0 +1,54 @@
+{
+  "name": "ahg_new_project",
+  "language": "hi",
+  "category": "MARKETING",
+  "parameter_format": "NAMED",
+  "components": [
+    {
+      "type": "HEADER",
+      "format": "IMAGE",
+      "example": {
+        "header_handle": [
+          "{{EXAMPLE_IMAGE_HANDLE}}"
+        ]
+      }
+    },
+    {
+      "type": "BODY",
+      "text": "Hi {{customer_name}}! 🚀\n\nHumne naya project poora kiya hai: {{project_title}}.\n{{project_details}}\n\nApne business ke liye aisa kuch chahiye? Free quote ke liye reply karein.",
+      "example": {
+        "body_text_named_params": [
+          {
+            "param_name": "customer_name",
+            "example": "Aisha"
+          },
+          {
+            "param_name": "project_title",
+            "example": "Restaurant ordering app"
+          },
+          {
+            "param_name": "project_details",
+            "example": "Online menu, table booking and WhatsApp order alerts."
+          }
+        ]
+      }
+    },
+    {
+      "type": "FOOTER",
+      "text": "Band karne ke liye STOP likhein"
+    },
+    {
+      "type": "BUTTONS",
+      "buttons": [
+        {
+          "type": "URL",
+          "text": "Project dekhein",
+          "url": "{{APP_URL}}/r/{{1}}",
+          "example": [
+            "{{APP_URL}}/r/a1b2c3d4e5f6"
+          ]
+        }
+      ]
+    }
+  ]
+}

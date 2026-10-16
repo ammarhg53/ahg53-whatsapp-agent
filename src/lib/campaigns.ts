@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { sheet, type Where } from './sheets';
 import { env } from './env';
 import { suppressedSet } from './consent';
-import { sendTemplate } from './templates';
+import { imageFromParams, sendTemplate } from './templates';
 import { reserveQuota, releaseQuota } from './quota';
 import { log } from './log';
 import type { Contact } from './types';
@@ -93,16 +93,18 @@ export async function processCampaigns(deadline: number): Promise<{ sent: number
       for (const r of sendable) {
         const contact = byId.get(r.contact_id)!;
         const res = await sendTemplate(contact, campaign.template_name, 'marketing', {
-          campaignId: campaign.id, fixed: campaign.params ?? {}, trackCode: r.track_code, quotaReserved: true
+          campaignId: campaign.id, fixed: campaign.params ?? {}, trackCode: r.track_code, quotaReserved: true,
+          image: imageFromParams(campaign.params)
         });
         if (res.ok) {
           void sheet.update('campaign_recipients', { id: r.id }, { status: 'sent', wamid: res.wamid, sent_at: new Date().toISOString() });
           stats.sent++;
         } else {
-          if (res.reason !== 'error') unused++; // template missing: nothing reached WhatsApp
-          void sheet.update('campaign_recipients', { id: r.id }, {
-            status: 'failed', error: res.reason === 'no_template' ? 'template not approved' : String(res.error ?? res.reason).slice(0, 200)
-          });
+          if (res.reason !== 'error') unused++; // template or picture missing: nothing reached WhatsApp
+          const reason = res.reason === 'no_template' ? 'template not approved'
+            : res.reason === 'no_image' ? 'no picture attached'
+            : String(('error' in res && res.error) || res.reason);
+          void sheet.update('campaign_recipients', { id: r.id }, { status: 'failed', error: reason.slice(0, 200) });
           stats.failed++;
         }
       }

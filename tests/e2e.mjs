@@ -37,7 +37,8 @@ await new Promise((r) => server.listen(MOCK_PORT, '127.0.0.1', r));
 
 const env = {
   ...process.env,
-  NODE_ENV: 'production',
+  // 'test' stops Next.js from loading the developer's .env.local over these values
+  NODE_ENV: 'test',
   NEXT_TELEMETRY_DISABLED: '1',
   APP_URL: 'https://bot.example.com',
   KAPSO_API_BASE_URL: `http://127.0.0.1:${MOCK_PORT}`,

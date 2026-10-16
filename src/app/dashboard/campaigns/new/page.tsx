@@ -3,7 +3,8 @@ import { sheet } from '@/lib/sheets';
 import type { Contact } from '@/lib/types';
 import { createCampaignAction } from '../../actions';
 import { Flash, type SearchParams } from '../../ui';
-import type { TemplateRow } from '@/lib/templates';
+import { needsImage, type TemplateRow } from '@/lib/templates';
+import { ImageFields } from '../../image-fields';
 
 // Params filled automatically from each contact; anything else is asked for below.
 const AUTO_PARAMS = new Set(['customer_name', 'country', 'business_name', 'service']);
@@ -19,6 +20,7 @@ export default async function NewCampaign({ searchParams }: { searchParams: Sear
   const variants = templates.filter((t) => t.name === chosen);
   const extraParams = [...new Set(variants.flatMap((t) => t.params))].filter((p) => !AUTO_PARAMS.has(p));
   const hasLink = variants.some((t) => t.has_url_var);
+  const hasImage = variants.some((t) => needsImage(t));
   const countries = [...new Set(contactMeta.map((c) => c.country).filter(Boolean))].sort() as string[];
   const tags = [...new Set(contactMeta.flatMap((c) => c.tags ?? []))].sort();
 
@@ -61,6 +63,7 @@ export default async function NewCampaign({ searchParams }: { searchParams: Sear
               {extraParams.map((p) => <label key={p}>{p}<input name={`param_${p}`} required maxLength={600} /></label>)}
             </fieldset>
           )}
+          {hasImage && <ImageFields />}
           {hasLink && <label>Button link (clicks are tracked)<input name="link_url" type="url" placeholder="https://ahg53.bond" /></label>}
           <label>Schedule (IST, leave empty to send right after you confirm)<input type="datetime-local" name="scheduled_at" /></label>
           <button className="btn primary">Preview &amp; check cost →</button>

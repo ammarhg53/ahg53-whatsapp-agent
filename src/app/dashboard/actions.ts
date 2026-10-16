@@ -10,7 +10,8 @@ import { send } from '@/lib/outbound';
 import { optIn, optOut, deleteContactData, eraseFromKapso, isSuppressed } from '@/lib/consent';
 import { importOptedIn } from '@/lib/import';
 import { resumeBot, pauseBot } from '@/lib/contacts';
-import { pickTemplate, sendTemplate, syncTemplates } from '@/lib/templates';
+import { imageFromParams, needsImage, pickTemplate, sendTemplate, syncTemplates } from '@/lib/templates';
+import { uploadMedia } from '@/lib/kapso';
 import { audienceSchema, confirmCampaign, countAudience } from '@/lib/campaigns';
 import { quotaStatus } from '@/lib/quota';
 import { saveSetting } from '@/lib/settings';
@@ -18,6 +19,31 @@ import { cleanField, cleanText, normalizeWaId } from '@/lib/sanitize';
 import type { Contact } from '@/lib/types';
 
 const uuid = z.string().uuid();
+
+const IMAGE_TYPES = ['image/jpeg', 'image/png'];
+
+/**
+ * Picture for an image template: an uploaded file (sent to WhatsApp, kept ~30 days)
+ * or a public https link. Returns params to store, or an error message.
+ */
+async function readImage(form: FormData): Promise<{ params: Record<string, string> } | { error: string }> {
+  const file = form.get('image_file');
+  if (file instanceof File && file.size > 0) {
+    if (!IMAGE_TYPES.includes(file.type)) return { error: 'The picture must be a JPG or PNG' };
+    if (file.size > 4 * 1024 * 1024) return { error: 'The picture must be under 4 MB' };
+    try {
+      return { params: { _image_id: await uploadMedia(file, file.type) } };
+    } catch (err) {
+      return { error: `Picture upload failed: ${(err as Error).message}` };
+    }
+  }
+  const link = String(form.get('image_link') ?? '').trim();
+  if (link) {
+    if (!/^https:\/\/[^\s"'<>]+$/.test(link)) return { error: 'The picture link must start with https://' };
+    return { params: { _image_link: link } };
+  }
+  return { params: {} };
+}
 const back = (path: string, msg: string): never => redirect(`${path}?msg=${encodeURIComponent(msg)}`);
 
 async function getContact(id: string): Promise<Contact> {
@@ -148,9 +174,16 @@ export async function sendToNumberAction(form: FormData) {
   for (const [k, v] of form.entries()) {
     if (k.startsWith('param_') && typeof v === 'string' && v.trim()) fixed[k.slice(6)] = cleanField(v, 600);
   }
-  const res = await sendTemplate(contact, template.data!, isMarketing ? 'marketing' : 'utility', { fixed });
+  let image;
+  if (needsImage(tpl!)) {
+    const img = await readImage(form);
+    if ('error' in img) fail(img.error);
+    else if (!Object.keys(img.params).length) fail('This template needs a picture — upload one or paste a link');
+    else image = imageFromParams(img.params);
+  }
+  const res = await sendTemplate(contact, template.data!, isMarketing ? 'marketing' : 'utility', { fixed, image });
   await sheet.drain();
-  if (!res.ok) fail(`Not sent: ${res.reason === 'quota' ? 'monthly message limit reached' : res.reason === 'no_template' ? 'template not approved' : (res as { error?: string }).error ?? 'error'}`);
+  if (!res.ok) fail(`Not sent: ${res.reason === 'quota' ? 'monthly message limit reached' : res.reason === 'no_template' ? 'template not approved' : res.reason === 'no_image' ? 'picture missing' : (res as { error?: string }).error ?? 'error'}`);
   back(`/dashboard/conversations/${contact.id}`, 'Template sent. When they reply you can type freely here for 24 hours.');
 }
 
@@ -185,6 +218,13 @@ export async function createCampaignAction(form: FormData) {
   const params: Record<string, string> = {};
   for (const [k, v] of form.entries()) {
     if (k.startsWith('param_') && typeof v === 'string' && v.trim()) params[k.slice(6)] = cleanField(v, 600);
+  }
+  const tplRows = await sheet.find<{ components: any[] }>('templates', { name: template.data!, status: 'APPROVED' });
+  if (tplRows.some((t) => needsImage(t))) {
+    const img = await readImage(form);
+    if ('error' in img) back(`/dashboard/campaigns/new?template=${template.data}`, img.error);
+    else if (!Object.keys(img.params).length) back(`/dashboard/campaigns/new?template=${template.data}`, 'This template needs a picture — upload one or paste a link');
+    else Object.assign(params, img.params);
   }
   const when = String(form.get('scheduled_at') ?? '');
   // datetime-local is entered in IST

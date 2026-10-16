@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { sheet } from '@/lib/sheets';
 import { audienceSchema, campaignStats, countAudience, sampleContact } from '@/lib/campaigns';
-import { pickTemplate, renderPreview } from '@/lib/templates';
+import { needsImage, pickTemplate, renderPreview } from '@/lib/templates';
 import { quotaStatus } from '@/lib/quota';
 import { cancelCampaignAction, confirmCampaignAction } from '../../actions';
 import { Flash, fmt, type SearchParams } from '../../ui';
@@ -44,6 +44,9 @@ export default async function CampaignPage({ params, searchParams }: { params: P
         <section className="card">
           <h2>Preview</h2>
           <p className="muted">Template <code>{c.template_name}</code>, shown for {sample.name ?? 'a contact'}.</p>
+          {tpl && needsImage(tpl) && (c.params?._image_link
+            ? <img src={c.params._image_link} alt="Campaign picture" style={{ maxWidth: 420, width: '100%', borderRadius: 12, display: 'block', marginBottom: 8 }} />
+            : c.params?._image_id ? <p className="muted">📷 Picture attached (uploaded to WhatsApp)</p> : <p className="error">No picture attached</p>)}
           <div className="preview">{preview}</div>
           {c.link_url && <p className="muted">Button opens {c.link_url} (tracked)</p>}
         </section>

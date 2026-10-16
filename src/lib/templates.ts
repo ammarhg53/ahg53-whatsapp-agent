@@ -84,12 +84,27 @@ export async function pickTemplate(name: string, lang: Contact['lang']): Promise
   return rows[0] ?? null;
 }
 
+export type HeaderImage = { id?: string; link?: string };
+
 export type TemplateContext = {
   contact: Pick<Contact, 'name' | 'country' | 'business_name'>;
   service?: string | null;
   fixed?: Record<string, string>;
   trackCode?: string;
+  image?: HeaderImage;
 };
+
+/** Does this template start with a picture (IMAGE header)? */
+export function needsImage(tpl: Pick<TemplateRow, 'components'>): boolean {
+  return (tpl.components ?? []).some((c) => c.type === 'HEADER' && c.format === 'IMAGE');
+}
+
+/** Image chosen for a campaign / send, kept inside its params as _image_id or _image_link. */
+export function imageFromParams(params: Record<string, string> | null | undefined): HeaderImage | undefined {
+  if (params?._image_id) return { id: params._image_id };
+  if (params?._image_link) return { link: params._image_link };
+  return undefined;
+}
 
 /** Meta rejects parameters with newlines, tabs or 4+ spaces. */
 const paramText = (s: string) => s.replace(/[\r\n\t]+/g, ' · ').replace(/ {4,}/g, '   ').trim().slice(0, 900) || '-';
@@ -108,6 +123,9 @@ export function resolveParam(name: string, ctx: TemplateContext): string {
 /** Send-time components for a template row, filled from the contact and fixed values. */
 export function templateComponents(tpl: TemplateRow, ctx: TemplateContext): unknown[] {
   const components: unknown[] = [];
+  if (needsImage(tpl) && ctx.image) {
+    components.push({ type: 'header', parameters: [{ type: 'image', image: ctx.image.id ? { id: ctx.image.id } : { link: ctx.image.link } }] });
+  }
   for (const c of tpl.components) {
     if ((c.type === 'HEADER' && c.format === 'TEXT') || c.type === 'BODY') {
       const names = extractParams([c]);
@@ -139,9 +157,10 @@ export async function sendTemplate(
   name: string,
   kind: SendKind,
   ctx: Omit<TemplateContext, 'contact'> & { campaignId?: string; quotaReserved?: boolean } = {}
-): Promise<SendResult | { ok: false; reason: 'no_template' }> {
+): Promise<SendResult | { ok: false; reason: 'no_template' | 'no_image' }> {
   const tpl = await pickTemplate(name, contact.lang);
   if (!tpl) return { ok: false, reason: 'no_template' };
+  if (needsImage(tpl) && !ctx.image?.id && !ctx.image?.link) return { ok: false, reason: 'no_image' };
   const payload = build.template(tpl.name, tpl.language, templateComponents(tpl, { ...ctx, contact }));
   return send(contact, payload, kind, { campaignId: ctx.campaignId, quotaReserved: ctx.quotaReserved });
 }

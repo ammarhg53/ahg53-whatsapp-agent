@@ -1,0 +1,54 @@
+{
+  "name": "ahg_new_project",
+  "language": "en",
+  "category": "MARKETING",
+  "parameter_format": "NAMED",
+  "components": [
+    {
+      "type": "HEADER",
+      "format": "IMAGE",
+      "example": {
+        "header_handle": [
+          "{{EXAMPLE_IMAGE_HANDLE}}"
+        ]
+      }
+    },
+    {
+      "type": "BODY",
+      "text": "Hi {{customer_name}}! 🚀\n\nWe just completed a new project: {{project_title}}.\n{{project_details}}\n\nWant something like this for your business? Reply to get a free quote.",
+      "example": {
+        "body_text_named_params": [
+          {
+            "param_name": "customer_name",
+            "example": "Aisha"
+          },
+          {
+            "param_name": "project_title",
+            "example": "Restaurant ordering app"
+          },
+          {
+            "param_name": "project_details",
+            "example": "Online menu, table booking and WhatsApp order alerts."
+          }
+        ]
+      }
+    },
+    {
+      "type": "FOOTER",
+      "text": "Reply STOP to unsubscribe"
+    },
+    {
+      "type": "BUTTONS",
+      "buttons": [
+        {
+          "type": "URL",
+          "text": "See the project",
+          "url": "{{APP_URL}}/r/{{1}}",
+          "example": [
+            "{{APP_URL}}/r/a1b2c3d4e5f6"
+          ]
+        }
+      ]
+    }
+  ]
+}

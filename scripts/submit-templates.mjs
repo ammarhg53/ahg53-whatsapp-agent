@@ -21,8 +21,33 @@ const dir = path.join(ROOT, 'templates');
 const files = readdirSync(dir).filter((f) => f.endsWith('.json')).sort();
 let failures = 0;
 
+// Image templates need a sample picture for Meta's review (customers get the picture you choose per campaign).
+// Default sample: the dashboard logo served by the app; override with --example-image https://...
+const exIdx = process.argv.indexOf('--example-image');
+const exampleImage = exIdx > -1 ? process.argv[exIdx + 1] : `${appUrl}/logo.png`;
+let exampleHandle = null;
+async function getExampleHandle() {
+  if (exampleHandle) return exampleHandle;
+  const up = await kapso('/platform/v1/whatsapp/media', {
+    method: 'POST',
+    body: JSON.stringify({ media_ingest: { phone_number_id: need('KAPSO_PHONE_NUMBER_ID'), source: exampleImage, delivery: 'meta_resumable_asset' } })
+  });
+  exampleHandle = up.data?.data?.target?.handle;
+  if (!up.ok || !exampleHandle) throw new Error(`sample image upload failed (${up.status}): ${JSON.stringify(up.data?.error ?? up.data).slice(0, 200)}`);
+  return exampleHandle;
+}
+
 for (const file of files) {
-  const raw = readFileSync(path.join(dir, file), 'utf8').replaceAll('{{APP_URL}}', appUrl);
+  let raw = readFileSync(path.join(dir, file), 'utf8').replaceAll('{{APP_URL}}', appUrl);
+  if (raw.includes('{{EXAMPLE_IMAGE_HANDLE}}') && !dry && (!only || raw.includes(`"name": "${only}"`))) {
+    try {
+      raw = raw.replaceAll('{{EXAMPLE_IMAGE_HANDLE}}', await getExampleHandle());
+    } catch (err) {
+      failures++;
+      console.log(`✗ ${file} → ${err.message}`);
+      continue;
+    }
+  }
   const tpl = JSON.parse(raw);
   if (only && tpl.name !== only) continue;
   const label = `${tpl.name} (${tpl.language}, ${tpl.category})`;
